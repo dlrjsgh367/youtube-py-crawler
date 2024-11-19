@@ -17,44 +17,45 @@ def download_with_timeout(video_stream, output_path, filename, timeout_duration)
     download_thread.join(timeout=timeout_duration)
 
     if download_thread.is_alive():
-        raise TimeoutException("Download took too long and was aborted.")
+        raise TimeoutException("다운로드가 너무 오래 걸려 중단되었습니다.")
 
 def download_youtube_video(video_url, output_path='downloads', filename=None):
     try:
-        # Create output directory if it doesn't exist
+        # 출력 디렉토리가 존재하지 않으면 생성
         if not os.path.exists(output_path):
             os.makedirs(output_path)
         
-        # Initialize YouTube object with progress callback
+        # 진행 상황 콜백과 함께 YouTube 객체 초기화
         yt = YouTube(video_url, on_progress_callback=on_progress)
         
-        # Select the highest resolution stream available
+        # 사용 가능한 가장 높은 해상도의 스트림 선택
         video_stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
         
         if not video_stream:
             print("No suitable stream found for the video.")
             return False
         
-        # Download the video with progress tracking and timeout
-        print(f"Downloading: {yt.title}")
+        # 진행 상황과 타임아웃을 사용하여 비디오 다운로드
+        print(f"다운로드 중: {yt.title}")
+
         start_time = time.time()
         download_with_timeout(video_stream, output_path, filename, timeout_duration=10)
         end_time = time.time()
         
-        print(f"Download completed. Saved to: {output_path}")
-        print(f"Total time taken: {end_time - start_time:.2f} seconds")
+        print(f"다운로드 완료. 저장 위치: {output_path}")
+        print(f"총 소요 시간: {end_time - start_time:.2f}초")
         return True
     except TimeoutException as e:
-        print(f"An error occurred: {e}")
+        print(f"Timeout 오류 발생: {e}")
         return False
     except urllib.error.HTTPError as e:
-        print(f"HTTP Error occurred: {e.code} - {e.reason}")
+        print(f"HTTP 오류 발생: {e.code} - {e.reason}")
         return False
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"오류 발생: {e}")
         return False
 
-# Example usage
+# 사용 예시
 if __name__ == '__main__':
-    video_url = 'https://www.youtube.com/watch?v=FwSh1PzhdPs'  # Replace with your video URL
+    video_url = 'https://www.youtube.com/watch?v=FwSh1PzhdPs'  # 사용할 비디오 URL로 교체하세요
     download_youtube_video(video_url, output_path='downloads', filename='my_video.mp4')
