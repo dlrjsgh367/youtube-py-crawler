@@ -19,11 +19,19 @@ def download_with_timeout(video_stream, output_path, filename, timeout_duration)
     if download_thread.is_alive():
         raise TimeoutException("다운로드가 너무 오래 걸려 중단되었습니다.")
 
+def should_skip_video(title, exclusion_keywords):
+    return any(keyword.lower() in title.lower() for keyword in exclusion_keywords)
+
 def download_youtube_video(video_url, output_path='downloads', filename=None):
     try:
         # 출력 디렉토리가 존재하지 않으면 생성
         if not os.path.exists(output_path):
             os.makedirs(output_path)
+        
+        # 특정 문자열이 포함된 제목의 비디오를 제외하도록 필터링
+        if exclusion_keywords and should_skip_video(yt.title, exclusion_keywords):
+            print(f"제목에 제외 키워드가 포함됨.: {yt.title}")
+            return False
         
         # 진행 상황 콜백과 함께 YouTube 객체 초기화
         yt = YouTube(video_url, on_progress_callback=on_progress)
@@ -58,4 +66,6 @@ def download_youtube_video(video_url, output_path='downloads', filename=None):
 # 사용 예시
 if __name__ == '__main__':
     video_url = 'https://www.youtube.com/watch?v=FwSh1PzhdPs'  # 사용할 비디오 URL로 교체하세요
-    download_youtube_video(video_url, output_path='downloads', filename='my_video.mp4')
+    exclusion_keywords = ['음원', 'sound', 'sound effect']  # 제외할 키워드 목록
+    download_youtube_video(video_url, output_path='downloads', filename='my_video.mp4', exclusion_keywords=exclusion_keywords)
+

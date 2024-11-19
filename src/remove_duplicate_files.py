@@ -4,7 +4,6 @@ def remove_duplicate_files(*folder_paths):
     seen_files = set()
     for folder_path in folder_paths:
         files = os.listdir(folder_path)
-        print('파일 수: {}'.format(len(files)))
         for file_name in files:
             file_path = os.path.join(folder_path, file_name)
             if os.path.isfile(file_path):
